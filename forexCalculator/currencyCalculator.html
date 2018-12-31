@@ -1,0 +1,167 @@
+<style>
+    #conversionPrice{
+        border: 0;
+        box-shadow: none;
+    }
+    #value{
+        border-color: #ed1c24;
+        color: #ed1c24;
+        text-align: center;
+        font-size:24px;
+        height: 60px;
+    }
+    #convert {
+        background-color: #00a658;
+        color: #fff;
+        border-color: #00a658;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        height: 70px;
+        width: 140px;
+        display: block;
+        margin: auto;
+    }
+    #convert:hover {
+        filter: brightness(150%);
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+    }
+    .modal-header {
+        background-color: #ed1c24;
+        color: #fff;
+    }
+    .modal-footer {
+        background-color: #ed1c24;
+        color: #fff;
+    }
+    .modal-body {
+        background-color: #333; 
+    }
+    label {
+        color: #fff;
+    }
+    .form-control:focus {
+        border-color: #ed1c24;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(255, 0, 0, 0.6);
+    }
+    option {
+        background-color: #ed1c24 !important;
+        color: #fff;
+    }
+
+</style>
+    
+    <!-- Button to Open the Modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+        Open Currency Converter
+    </button>
+
+
+    <!-- The Modal -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+      
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <h5 class="modal-title text-white">Currency Converter</h5>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+      
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="container">
+                    <div ng-controller="forexCalculatorController">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label for="currencyFrom">Currency From:</label>
+                                        <select class="form-control" id="currencyFrom">
+                                            <option ng-repeat="cur in currency" value="'{{cur.code}}'">{{cur.code}}</option>
+                                        </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label for="currencyTo">Currency To:</label>
+                                        <select class="form-control" id="currencyTo">
+                                            <option ng-repeat="cur in currency" value="'{{cur.code}}'">{{cur.code}}</option>
+                                        </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label for="amount">Amount:</label>
+                                    <input type="number" class="form-control" id="amount" placeholder="Amount">
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label for="conversionPrice">Current Conversion Price:</label>
+                                    <input type="text" class="form-control" id="conversionPrice" value="1" readonly >
+                                </div>
+                            </div>
+                        </div>
+                        <hr style="border-color: white;">
+                        <div class="row">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <br>
+                                <button class="btn btn-primary" id="convert">CONVERT</button>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label for="value">Value:</label>
+                                    <input type="text" class="form-control" id="value" value="0" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                </div>
+            </div>
+      
+            <!-- Modal footer -->
+            <div class="modal-footer">
+              By: ABFX
+            </div>
+      
+          </div>
+        </div>
+      </div>
+    <script>
+        $(document).ready(function(){
+            //Get Current conversion price
+            $(document).on('change', '#currencyFrom, #currencyTo' , function(){
+                $("#value").val(0);
+                var cf = $('#currencyFrom').val();
+                var ct = $('#currencyTo').val();
+                //Below code is to remove (') character from select
+                cf = cf.replace(/'/g, "");
+                ct = ct.replace(/'/g, "");
+                //concat 2 currency name for the api call
+                var pair = String(cf+"_"+ct);
+                $.ajax({
+                    //concat selected currency to api url
+                    url: "http://free.currencyconverterapi.com/api/v5/convert?q="+cf+"_"+ct+"&compact=y",
+                    type: "get",
+                    success: function(response){
+                        /* alert(response[pair]['val']); */
+                        $('#conversionPrice').val(response[pair]['val']);
+                    }
+                });
+            });
+
+            $(document).on('change', '#amount' , function(){
+                $("#value").val(0);  
+            });
+            //Convert function
+            $(document).on('click', '#convert', function(){
+                var conversionPrice = $("#conversionPrice").val();
+                var amount = $("#amount").val()
+                var value = amount * conversionPrice;
+                $("#value").val(value.toFixed(2));
+            });
+
+        });
+    </script>
